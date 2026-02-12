@@ -44,35 +44,3 @@ npm install
 npm run dev
 # 访问 http://localhost:5173
 ```
-
-## 关于 3D Tiles 与 GitHub 发布
-- 当前项目将 3D Tiles 存放在 `backend/static/tiles/`，**默认被 `.gitignore` 排除**，因为 3D Tiles 可能包含大量二进制文件（`.glb`、`.b3dm` 等），不适合直接提交到 GitHub 普通仓库。
-
-推荐替代方案：
-- 将 `backend/static/tiles/` 上传到对象存储（如阿里 OSS / 腾讯 COS / AWS S3），再把公开 URL 写入 `frontend/.env`（`VITE_TILES_BASE`），并在前端或后端使用该 URL 加载 3D Tiles。
-- 或启用 Git LFS（适用于有限量的大文件），并在仓库中使用 `git lfs track "*.glb" "*.b3dm" "*.pnts"`，注意 Git LFS 有免费额度限制。
-
-## Git 初始化与推送
-仓库尚未关联远程。要推送到 GitHub：
-
-```bash
-# 在仓库根目录执行
-git init
-git add .
-git commit -m "Initial commit: project scaffold and README"
-# 添加远程仓库（替换为你的 URL）
-git remote add origin git@github.com:yourname/cjw-red-map.git
-git branch -M main
-git push -u origin main
-```
-
-如果你想把 3D Tiles 与媒体一并托管到远程，请告诉我你希望使用 Git LFS 还是对象存储（我会生成对应步骤）。
-
-## 我能继续帮你做的事
-- 帮你把 `backend/static/tiles/` 上传到 OSS 并更新配置（需凭证或目标 URL）
-- 或启用 Git LFS 并示范如何跟踪/提交大文件
-- 或为仓库创建 GitHub 仓库并推送（需你授权或提供仓库 URL）
-
----
-
-作者：项目助手
