@@ -1,0 +1,61 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+env/
+venv/
+.venv/
+ENV/
+.env
+
+# Node
+node_modules/
+/dist/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Vite
+/.vite
+
+# Logs
+logs/
+*.log
+
+# Editor
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+
+# System
+.DS_Store
+Thumbs.db
+
+# Backend uploads and local files
+backend/uploads/
+
+# 3D tiles (do not commit large binary tiles). If you want to include them, use Git LFS instead.
+backend/static/tiles/
+
+# Build artifacts
+dist/
+
+# Optional: lockfiles
+package-lock.json
+
+# Coverage
+coverage/
+
+# Mac
+*.DS_Store
+
+# Windows
+Thumbs.db
+
+# Misc
+*.db
+*.sqlite

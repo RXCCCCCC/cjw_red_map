@@ -1,0 +1,62 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ─── 全局变量 ─── */
+:root {
+  --red-primary: #C41E24;
+  --red-dark: #8B0000;
+  --gold: #D4A843;
+  --bg-cream: #FFF8F0;
+}
+
+/* ─── 基础重置 ─── */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body, #app {
+  width: 100%;
+  height: 100%;
+  font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  background: var(--bg-cream);
+  color: #333;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ─── 滚动条美化 ─── */
+::-webkit-scrollbar {
+  width: 4px;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--red-primary);
+  border-radius: 2px;
+}
+
+/* ─── Cesium 容器 ─── */
+.cesium-container {
+  width: 100%;
+  height: 100%;
+}
+.cesium-viewer-bottom {
+  display: none !important;
+}
+
+/* ─── Leaflet 容器 ─── */
+.leaflet-container {
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+}
+
+/* ─── 页面切换动画 ─── */
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.25s ease;
+}
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
