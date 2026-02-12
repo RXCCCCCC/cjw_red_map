@@ -12,7 +12,7 @@
 cjw/
 ├── backend/                 # Flask 后端
 │   ├── app/
-│   ├── static/tiles/        # 3D Tiles（当前已移动到此处）
+│   ├── static/tiles/        # 3D Tiles
 │   ├── requirements.txt
 │   └── run.py
 ├── frontend/                # Vue 前端
