@@ -9,7 +9,7 @@
 
 ## 目录结构（简化）
 ```
-cjw/
+cjw_red_map/
 ├── backend/                 # Flask 后端
 │   ├── app/
 │   ├── static/tiles/        # 3D Tiles
