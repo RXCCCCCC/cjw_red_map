@@ -9,8 +9,9 @@ class Site(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     name = db.Column(db.String(100), nullable=False, comment='遗址名称')
     description = db.Column(db.Text, comment='遗址简介')
-    longitude = db.Column(db.Float, nullable=False, comment='经度 WGS84')
-    latitude = db.Column(db.Float, nullable=False, comment='纬度 WGS84')
+    longitude = db.Column(db.Numeric(12, 8), nullable=False, comment='经度 WGS84')
+    latitude = db.Column(db.Numeric(12, 8), nullable=False, comment='纬度 WGS84')
+    height = db.Column(db.Numeric(10, 4), default=0, comment='高度(米) 用于3D标注')
     category = db.Column(db.String(50), comment='分类')
     icon = db.Column(db.String(200), default='', comment='地图图标URL')
     cover_image = db.Column(db.String(200), default='', comment='封面图URL')
@@ -26,8 +27,9 @@ class Site(db.Model):
             'id': self.id,
             'name': self.name,
             'description': self.description,
-            'longitude': self.longitude,
-            'latitude': self.latitude,
+            'longitude': float(self.longitude) if self.longitude is not None else None,
+            'latitude': float(self.latitude) if self.latitude is not None else None,
+            'height': float(self.height) if self.height else 0,
             'category': self.category,
             'icon': self.icon,
             'cover_image': self.cover_image,

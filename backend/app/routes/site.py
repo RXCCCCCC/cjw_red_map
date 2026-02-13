@@ -9,7 +9,11 @@ site_bp = Blueprint('site', __name__)
 def get_sites():
     """获取全部遗址列表"""
     sites = Site.query.order_by(Site.sort_order).all()
-    return jsonify({'code': 0, 'data': [s.to_dict() for s in sites]})
+    resp = jsonify({'code': 0, 'data': [s.to_dict() for s in sites]})
+    resp.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
+    resp.headers['Pragma'] = 'no-cache'
+    resp.headers['Expires'] = '0'
+    return resp
 
 
 @site_bp.route('/sites/<int:site_id>', methods=['GET'])
@@ -31,6 +35,7 @@ def create_site():
         description=body.get('description', ''),
         longitude=body['longitude'],
         latitude=body['latitude'],
+        height=body.get('height', 0),
         category=body.get('category', ''),
         icon=body.get('icon', ''),
         cover_image=body.get('cover_image', ''),
@@ -46,10 +51,11 @@ def update_site(site_id):
     """更新遗址"""
     site = Site.query.get_or_404(site_id)
     body = request.get_json()
-    for field in ['name', 'description', 'longitude', 'latitude', 'category', 'icon', 'cover_image', 'sort_order']:
+    for field in ['name', 'description', 'longitude', 'latitude', 'height', 'category', 'icon', 'cover_image', 'sort_order']:
         if field in body:
             setattr(site, field, body[field])
     db.session.commit()
+    db.session.refresh(site)
     return jsonify({'code': 0, 'data': site.to_dict()})
 
 

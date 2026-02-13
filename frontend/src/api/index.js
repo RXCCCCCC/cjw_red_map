@@ -22,4 +22,15 @@ export const getSiteAudioGuides = (siteId) => api.get(`/sites/${siteId}/audio-gu
 export const createAudioGuide = (data) => api.post('/audio-guides', data)
 export const deleteAudioGuide = (id) => api.delete(`/audio-guides/${id}`)
 
+// ─── 文件上传 ───
+export const uploadFile = (file, title = '') => {
+  const formData = new FormData()
+  formData.append('file', file)
+  if (title) formData.append('title', title)
+  return api.post('/upload', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+    timeout: 60000, // 大文件给更长超时
+  })
+}
+
 export default api
