@@ -7,7 +7,7 @@
     <div class="flex-1 relative">
       <MapContainer :sites="sites" @marker-click="onMarkerClick" />
 
-      <!-- 底部遗址列表（可滑出） -->
+      <!-- 底部地标列表（可滑出） -->
       <div class="absolute bottom-0 left-0 right-0 z-[1000]">
         <div
           class="bg-white rounded-t-2xl shadow-lg px-4 pt-3 pb-4 max-h-[40vh] overflow-y-auto"
@@ -17,7 +17,7 @@
           <div class="flex items-center justify-center mb-3" @click="listOpen = !listOpen">
             <div class="w-10 h-1 rounded bg-gray-300"></div>
           </div>
-          <h3 class="text-red-primary font-semibold text-sm mb-3">红色遗址列表</h3>
+          <h3 class="text-red-primary font-semibold text-sm mb-3">红色地标列表</h3>
           <div v-if="loading" class="text-center text-gray-400 py-6">加载中...</div>
           <div v-else class="space-y-3">
             <SiteCard

@@ -5,7 +5,7 @@ const api = axios.create({
   timeout: 10000,
 })
 
-// ─── 遗址 ───
+// ─── 红色地标 ───
 export const getSites = () => api.get('/sites')
 export const getSite = (id) => api.get(`/sites/${id}`)
 export const createSite = (data) => api.post('/sites', data)

@@ -23,7 +23,7 @@
             class="px-2 py-1 text-[11px] rounded-md shadow"
             :class="editAction === 'add' ? 'bg-green-600 text-white' : 'bg-white/90 hover:bg-white'"
             @click="editAction = editAction === 'add' ? null : 'add'"
-          >📍 添加遗址</button>
+          >📍 添加地标</button>
           <button
             class="px-2 py-1 text-[11px] rounded-md shadow"
             :class="editAction === 'drag' ? 'bg-blue-600 text-white' : 'bg-white/90 hover:bg-white'"
@@ -31,10 +31,10 @@
           >✋ 拖动调整</button>
         </div>
         <div v-if="editAction === 'add'" class="bg-green-100 text-green-800 px-2 py-1 rounded text-[10px]">
-          点击地图任意位置添加新遗址点
+          点击地图任意位置添加新地标点
         </div>
         <div v-if="editAction === 'drag'" class="bg-blue-100 text-blue-800 px-2 py-1 rounded text-[10px]">
-          按住左键拖动遗址标注点移动位置
+          按住左键拖动地标标注点移动位置
         </div>
       </template>
     </div>
@@ -66,15 +66,15 @@
       </div>
     </Transition>
 
-    <!-- ════════ 新增遗址表单对话框 ════════ -->
+    <!-- ════════ 新增地标表单对话框 ════════ -->
     <Transition name="popup-fade">
       <div v-if="showAddForm" class="absolute inset-0 z-50 flex items-center justify-center bg-black/40">
         <div class="bg-white rounded-xl shadow-2xl p-5 w-80 max-h-[80vh] overflow-y-auto">
-          <h3 class="text-sm font-bold text-gray-800 mb-3">📍 新增遗址</h3>
+          <h3 class="text-sm font-bold text-gray-800 mb-3">📍 新增地标</h3>
           <div class="space-y-2 text-xs">
             <div>
               <label class="block text-gray-500 mb-0.5">名称 *</label>
-              <input v-model="addForm.name" class="w-full border rounded px-2 py-1.5 text-sm" placeholder="遗址名称" />
+              <input v-model="addForm.name" class="w-full border rounded px-2 py-1.5 text-sm" placeholder="地标名称" />
             </div>
             <div>
               <label class="block text-gray-500 mb-0.5">分类</label>
@@ -82,7 +82,7 @@
             </div>
             <div>
               <label class="block text-gray-500 mb-0.5">描述</label>
-              <textarea v-model="addForm.description" rows="3" class="w-full border rounded px-2 py-1.5 text-sm" placeholder="遗址简介..." />
+              <textarea v-model="addForm.description" rows="3" class="w-full border rounded px-2 py-1.5 text-sm" placeholder="地标简介..." />
             </div>
             <div class="grid grid-cols-3 gap-1">
               <div>
@@ -114,15 +114,15 @@
       </div>
     </Transition>
 
-    <!-- ════════ 编辑遗址信息表单对话框 ════════ -->
+    <!-- ════════ 编辑地标信息表单对话框 ════════ -->
     <Transition name="popup-fade">
       <div v-if="showEditForm" class="absolute inset-0 z-50 flex items-center justify-center bg-black/40">
         <div class="bg-white rounded-xl shadow-2xl p-5 w-80 max-h-[80vh] overflow-y-auto">
-          <h3 class="text-sm font-bold text-gray-800 mb-3">✏️ 编辑遗址信息</h3>
+          <h3 class="text-sm font-bold text-gray-800 mb-3">✏️ 编辑地标信息</h3>
           <div class="space-y-2 text-xs">
             <div>
               <label class="block text-gray-500 mb-0.5">名称 *</label>
-              <input v-model="editForm.name" class="w-full border rounded px-2 py-1.5 text-sm" placeholder="遗址名称" />
+              <input v-model="editForm.name" class="w-full border rounded px-2 py-1.5 text-sm" placeholder="地标名称" />
             </div>
             <div>
               <label class="block text-gray-500 mb-0.5">分类</label>
@@ -130,7 +130,7 @@
             </div>
             <div>
               <label class="block text-gray-500 mb-0.5">描述</label>
-              <textarea v-model="editForm.description" rows="4" class="w-full border rounded px-2 py-1.5 text-sm" placeholder="遗址简介..." />
+              <textarea v-model="editForm.description" rows="4" class="w-full border rounded px-2 py-1.5 text-sm" placeholder="地标简介..." />
             </div>
             <div class="grid grid-cols-3 gap-1">
               <div>
@@ -166,7 +166,7 @@
       </div>
     </Transition>
 
-    <!-- ════════ 遗址信息弹窗（查看+编辑+媒体管理） ════════ -->
+    <!-- ════════ 地标信息弹窗（查看+编辑+媒体管理） ════════ -->
     <Transition name="popup-fade">
       <div
         v-if="selectedSite"
@@ -245,13 +245,13 @@
             <button
               class="mt-3 w-full text-xs text-white bg-blue-600 rounded-full px-3 py-1.5 hover:bg-blue-700 transition"
               @click="openEditForm"
-            >✏️ 编辑遗址信息</button>
+            >✏️ 编辑地标信息</button>
 
-            <!-- 编辑模式：删除遗址 -->
+            <!-- 编辑模式：删除地标 -->
             <button
               class="mt-2 w-full text-xs text-red-500 border border-red-300 rounded-full px-3 py-1.5 hover:bg-red-50 transition"
               @click="deleteSiteConfirm"
-            >🗑️ 删除此遗址</button>
+            >🗑️ 删除此地标</button>
           </template>
         </div>
       </div>
@@ -286,10 +286,10 @@ const passwordError = ref(false)
 const showAddForm = ref(false)
 const uploading = ref(false)
 const siteMediaList = ref([])
-const showEditForm = ref(false)   // 编辑遗址信息表单是否显示
+const showEditForm = ref(false)   // 编辑地标信息表单是否显示
 const editSaving = ref(false)     // 编辑保存中
 
-// 编辑遗址信息表单（回填当前值）
+// 编辑地标信息表单（回填当前值）
 const editForm = ref({
   id: null,
   name: '',
@@ -301,7 +301,7 @@ const editForm = ref({
   sort_order: 0,
 })
 
-// 新增遗址表单
+// 新增地标表单
 const addForm = ref({
   name: '',
   description: '',
@@ -340,7 +340,7 @@ function setupDragHandler() {
   if (dragHandler) dragHandler.destroy()
   dragHandler = new Cesium.ScreenSpaceEventHandler(viewer.canvas)
 
-  // 按下 → 检测是否选中了遗址标注
+  // 按下 → 检测是否选中了地标标注
   dragHandler.setInputAction((click) => {
     if (!editMode.value || editAction.value !== 'drag') return
     const picked = viewer.scene.pick(click.position)
@@ -410,7 +410,7 @@ function setupDragHandler() {
 
     try {
       const resp = await updateSite(siteId, { longitude: lon, latitude: lat, height: h })
-      console.log(`✅ 遗址 ${siteId} 位置已保存: ${lon.toFixed(5)}, ${lat.toFixed(5)}, ${h.toFixed(1)}m`, resp.data)
+      console.log(`✅ 地标 ${siteId} 位置已保存: ${lon.toFixed(5)}, ${lat.toFixed(5)}, ${h.toFixed(1)}m`, resp.data)
       // 更新 properties 中缓存的数据
       try {
         const siteData = draggingEntity.properties?.siteData?.getValue(Cesium.JulianDate.now())
@@ -460,13 +460,13 @@ function pickPosition(screenPos) {
   return cartesian || null
 }
 
-/* ══════ 导航到遗址详情页 ══════ */
+/* ══════ 导航到地标详情页 ══════ */
 function goDetail(id) {
   selectedSite.value = null
   router.push(`/site/${id}`)
 }
 
-/* ══════ 在 3D 地图上添加遗址标注 ══════ */
+/* ══════ 在 3D 地图上添加地标标注 ══════ */
 function addSiteMarker(site) {
   if (!viewer || site.longitude == null || site.latitude == null) return
   // 如果已存在则先移除
@@ -513,7 +513,7 @@ function addSiteMarkers(sites) {
 function setupClickHandler() {
   clickHandler = new Cesium.ScreenSpaceEventHandler(viewer.canvas)
   clickHandler.setInputAction(async (movement) => {
-    // ── 编辑模式：添加新遗址 ──
+    // ── 编辑模式：添加新地标 ──
     if (editMode.value && editAction.value === 'add') {
       const cartesian = pickPosition(movement.position)
       if (!cartesian) return
@@ -531,17 +531,17 @@ function setupClickHandler() {
     // ── 编辑模式：拖动时不处理普通点击 ──
     if (editMode.value && editAction.value === 'drag') return
 
-    // ── 普通模式 & 编辑模式无工具：查看遗址信息 ──
+    // ── 普通模式 & 编辑模式无工具：查看地标信息 ──
     const picked = viewer.scene.pick(movement.position)
     if (Cesium.defined(picked) && picked.id && String(picked.id.id || picked.id._id || '').startsWith('site-')) {
-      // 安全取出绑定在 entity.properties 上的遗址数据
+      // 安全取出绑定在 entity.properties 上的地标数据
       let siteData = null
       try {
         siteData = picked.id.properties?.siteData?.getValue(Cesium.JulianDate.now())
       } catch (_) { /* ignore */ }
       if (siteData) {
         selectedSite.value = { ...siteData }
-        // 编辑模式下也加载该遗址的媒体列表
+        // 编辑模式下也加载该地标的媒体列表
         if (editMode.value) {
           loadSiteMedia(siteData.id)
         }
@@ -552,7 +552,7 @@ function setupClickHandler() {
   }, Cesium.ScreenSpaceEventType.LEFT_CLICK)
 }
 
-/* ══════ 提交新遗址 ══════ */
+/* ══════ 提交新地标 ══════ */
 async function submitNewSite() {
   if (!addForm.value.name) return
   try {
@@ -568,18 +568,18 @@ async function submitNewSite() {
     const newSite = data.data
     addSiteMarker(newSite)
     showAddForm.value = false
-    console.log(`✅ 新遗址已添加: ${newSite.name} (id=${newSite.id})`)
+    console.log(`✅ 新地标已添加: ${newSite.name} (id=${newSite.id})`)
   } catch (e) {
-    console.error('添加遗址失败:', e)
+    console.error('添加地标失败:', e)
     alert('添加失败，请检查控制台')
   }
 }
 
-/* ══════ 编辑遗址信息 ══════ */
+/* ══════ 编辑地标信息 ══════ */
 function openEditForm() {
   if (!selectedSite.value) return
   const s = selectedSite.value
-  // 将弹窗中当前遗址数据回填到编辑表单
+  // 将弹窗中当前地标数据回填到编辑表单
   editForm.value = {
     id: s.id,
     name: s.name || '',
@@ -623,9 +623,9 @@ async function submitEditSite() {
     }
 
     showEditForm.value = false
-    console.log(`✅ 遗址「${updated.name}」信息已更新`)
+    console.log(`✅ 地标「${updated.name}」信息已更新`)
   } catch (e) {
-    console.error('❌ 更新遗址信息失败:', e)
+    console.error('❌ 更新地标信息失败:', e)
     alert('保存失败，请检查网络或后端是否运行')
   } finally {
     editSaving.value = false
@@ -651,7 +651,7 @@ async function uploadMediaFiles(event) {
       // 1) 上传文件到服务器
       const { data: uploadRes } = await uploadFile(file)
       const info = uploadRes.data
-      // 2) 创建媒体记录关联到遗址
+      // 2) 创建媒体记录关联到地标
       await createMedia({
         site_id: selectedSite.value.id,
         type: info.type,
@@ -705,17 +705,17 @@ async function removeMedia(mediaId) {
   }
 }
 
-/* ══════ 删除遗址 ══════ */
+/* ══════ 删除地标 ══════ */
 async function deleteSiteConfirm() {
   if (!selectedSite.value) return
-  if (!confirm(`确定删除遗址「${selectedSite.value.name}」？此操作不可撤销！`)) return
+  if (!confirm(`确定删除地标「${selectedSite.value.name}」？此操作不可撤销！`)) return
   try {
     await apiDeleteSite(selectedSite.value.id)
     viewer.entities.removeById(`site-${selectedSite.value.id}`)
     selectedSite.value = null
-    console.log('✅ 遗址已删除')
+    console.log('✅ 地标已删除')
   } catch (e) {
-    console.error('删除遗址失败:', e)
+    console.error('删除地标失败:', e)
   }
 }
 
@@ -778,12 +778,12 @@ onMounted(async () => {
     console.error('加载 3D Tiles 失败:', e)
   }
 
-  // 加载遗址列表并在地图上标注
+  // 加载地标列表并在地图上标注
   try {
     const { data } = await getSites()
     addSiteMarkers(data.data || [])
   } catch (e) {
-    console.error('加载遗址数据失败:', e)
+    console.error('加载地标数据失败:', e)
   }
 
   setupClickHandler()

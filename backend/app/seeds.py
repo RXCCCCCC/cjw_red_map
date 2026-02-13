@@ -1,4 +1,4 @@
-"""种子数据：预置程家湾红色遗址信息"""
+"""种子数据：预置程家湾红色地标信息"""
 from app import db
 from app.models import Site, Media, AudioGuide
 
@@ -6,7 +6,7 @@ from app.models import Site, Media, AudioGuide
 def seed_data():
     """插入初始数据"""
 
-    # ── 遗址 ──
+    # ── 红色地标 ──
     sites_data = [
         {
             'name': '纪念馆',
@@ -33,7 +33,7 @@ def seed_data():
     # ── 媒体资源（示例占位） ──
     all_sites = Site.query.all()
     for site in all_sites:
-        # 每个遗址添加一张占位图片记录
+        # 每个地标添加一张占位图片记录
         db.session.add(Media(
             site_id=site.id,
             type='image',
@@ -55,4 +55,4 @@ def seed_data():
         ))
 
     db.session.commit()
-    print(f'✅ 种子数据插入完成：{len(all_sites)} 个遗址')
+    print(f'✅ 种子数据插入完成：{len(all_sites)} 个地标')

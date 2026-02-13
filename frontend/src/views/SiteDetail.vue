@@ -1,6 +1,6 @@
 <template>
   <div class="site-detail min-h-screen bg-gray-50">
-    <NavBar :title="site?.name || '遗址详情'" />
+    <NavBar :title="site?.name || '地标详情'" />
 
     <div v-if="loading" class="flex items-center justify-center h-64">
       <van-loading type="spinner" color="#C41E24" />
@@ -27,23 +27,11 @@
       <!-- 简介 -->
       <section class="px-4 py-4">
         <h3 class="text-red-primary font-semibold text-base mb-2 flex items-center gap-1">
-          📜 遗址简介
+          📜 地标简介
         </h3>
         <p class="text-gray-600 text-sm leading-relaxed">{{ site.description }}</p>
       </section>
-
-      <van-divider />
-
-      <!-- 坐标信息 -->
-      <section class="px-4 pb-3">
-        <h3 class="text-red-primary font-semibold text-base mb-2 flex items-center gap-1">
-          📍 地理坐标
-        </h3>
-        <div class="text-gray-500 text-sm">
-          经度: {{ site.longitude?.toFixed(6) }} &nbsp; 纬度: {{ site.latitude?.toFixed(6) }}
-        </div>
-      </section>
-
+      
       <van-divider />
 
       <!-- 语音导览 -->
@@ -62,10 +50,10 @@
 
       <van-divider />
 
-      <!-- 历史图片 -->
+      <!-- 地标图片 -->
       <section class="px-4 pb-3" v-if="images.length">
         <h3 class="text-red-primary font-semibold text-base mb-3 flex items-center gap-1">
-          🖼️ 历史图片
+          🖼️ 地标图片
         </h3>
         <div class="grid grid-cols-2 gap-2">
           <div

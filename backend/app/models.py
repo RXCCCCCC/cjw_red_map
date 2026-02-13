@@ -3,12 +3,12 @@ from app import db
 
 
 class Site(db.Model):
-    """红色遗址"""
+    """红色地标（纪念设施、军事遗址、革命旧址、居民生活区等）"""
     __tablename__ = 'sites'
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    name = db.Column(db.String(100), nullable=False, comment='遗址名称')
-    description = db.Column(db.Text, comment='遗址简介')
+    name = db.Column(db.String(100), nullable=False, comment='地标名称')
+    description = db.Column(db.Text, comment='地标简介')
     longitude = db.Column(db.Numeric(12, 8), nullable=False, comment='经度 WGS84')
     latitude = db.Column(db.Numeric(12, 8), nullable=False, comment='纬度 WGS84')
     height = db.Column(db.Numeric(10, 4), default=0, comment='高度(米) 用于3D标注')

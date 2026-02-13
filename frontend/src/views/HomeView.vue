@@ -33,7 +33,7 @@
         >
           <div class="text-3xl mb-2">🗺️</div>
           <div class="font-semibold">红色地图</div>
-          <div class="text-xs text-white/60 mt-1">遗址标注 · 导览</div>
+          <div class="text-xs text-white/60 mt-1">地标标注 · 导览</div>
         </router-link>
 
         <router-link
@@ -50,7 +50,7 @@
           class="entry-card bg-white/15 backdrop-blur-md rounded-2xl p-5 text-center text-white hover:bg-white/25 transition"
         >
           <div class="text-3xl mb-2">🏥</div>
-          <div class="font-semibold">遗址详情</div>
+          <div class="font-semibold">地标详情</div>
           <div class="text-xs text-white/60 mt-1">图文 · 语音</div>
         </router-link>
 

@@ -23,7 +23,7 @@ const routes = [
     path: '/site/:id',
     name: 'SiteDetail',
     component: () => import('@/views/SiteDetail.vue'),
-    meta: { title: '遗址详情' },
+    meta: { title: '地标详情' },
     props: true,
   },
   {
