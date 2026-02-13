@@ -374,14 +374,7 @@ function setupDragHandler() {
       const lon = Cesium.Math.toDegrees(carto.longitude)
       const lat = Cesium.Math.toDegrees(carto.latitude)
       const h = carto.height
-      // 安全读取 siteData
-      let siteData = null
-      try {
-        siteData = draggingEntity.properties?.siteData?.getValue(Cesium.JulianDate.now())
-      } catch (_) { /* ignore */ }
-      if (siteData && draggingEntity.label) {
-        draggingEntity.label.text = `${siteData.name}\n经:${lon.toFixed(5)} 纬:${lat.toFixed(5)}\n高:${h.toFixed(1)}m`
-      }
+      // 安全读取 siteData，不再更新 label.text（已移除）
     }
   }, Cesium.ScreenSpaceEventType.MOUSE_MOVE)
 
@@ -460,6 +453,70 @@ function pickPosition(screenPos) {
   return cartesian || null
 }
 
+/* ══════ 生成圆角标签图片的 Canvas ══════ */
+function createSiteLabelCanvas(text) {
+  const canvas = document.createElement('canvas')
+  const ctx = canvas.getContext('2d')
+  
+  // 样式配置：基于之前的优化，继续加大内边距并圆角化
+  const fontSize = 32 // 内部绘制分辨率更高，保证缩放清晰
+  const font = '900 32px "Microsoft YaHei", "PingFang SC", sans-serif'
+  const padding = { x: 32, y: 16 } // 边框改大：水平 32，垂直 16
+  const radius = 20 // 大圆角
+  const bgColor = 'rgba(185, 28, 28, 0.95)' // #B91C1C 更深一点
+  
+  // 1. 计算尺寸
+  ctx.font = font
+  const metrics = ctx.measureText(text)
+  const textWidth = metrics.width
+  const w = textWidth + padding.x * 2
+  const h = fontSize * 1.5 + padding.y * 2 // 高度估算
+  
+  canvas.width = w
+  canvas.height = h
+  
+  // 2. 重置上下文并绘制背景
+  ctx.font = font
+  ctx.textBaseline = 'middle'
+  ctx.textAlign = 'center'
+  
+  // 绘制圆角矩形
+  ctx.fillStyle = bgColor
+  ctx.beginPath()
+  ctx.moveTo(radius, 0)
+  ctx.lineTo(w - radius, 0)
+  ctx.quadraticCurveTo(w, 0, w, radius)
+  ctx.lineTo(w, h - radius)
+  ctx.quadraticCurveTo(w, h, w - radius, h)
+  ctx.lineTo(radius, h)
+  ctx.quadraticCurveTo(0, h, 0, h - radius)
+  ctx.lineTo(0, radius)
+  ctx.quadraticCurveTo(0, 0, radius, 0)
+  ctx.closePath()
+  ctx.fill()
+  
+  // 绘制边框（可选，如果需要外发光或描边）
+  // ctx.lineWidth = 2;
+  // ctx.strokeStyle = 'white';
+  // ctx.stroke();
+
+  // 3. 绘制文字
+  const centerX = w / 2
+  const centerY = h / 2
+  
+  // 文字描边（黑色半透明）
+  ctx.lineWidth = 6
+  ctx.lineJoin = 'round'
+  ctx.strokeStyle = 'rgba(0, 0, 0, 0.6)'
+  ctx.strokeText(text, centerX, centerY)
+  
+  // 文字填充（白色）
+  ctx.fillStyle = 'white'
+  ctx.fillText(text, centerX, centerY)
+  
+  return canvas
+}
+
 /* ══════ 导航到地标详情页 ══════ */
 function goDetail(id) {
   selectedSite.value = null
@@ -479,28 +536,33 @@ function addSiteMarker(site) {
     name: site.name,
     properties: { siteData: site },
     position: Cesium.Cartesian3.fromDegrees(site.longitude, site.latitude, site.height || 0),
+    // 外圈光晕（半透明大圆）
+    ellipse: {
+      semiMajorAxis: 8.0,
+      semiMinorAxis: 8.0,
+      material: Cesium.Color.fromCssColorString('#C41E24').withAlpha(0.25),
+      heightReference: Cesium.HeightReference.NONE,
+    },
     point: {
-      pixelSize: 14,
+      pixelSize: 10,
       color: Cesium.Color.fromCssColorString('#C41E24'),
       outlineColor: Cesium.Color.WHITE,
-      outlineWidth: 2,
+      outlineWidth: 3,
       heightReference: Cesium.HeightReference.NONE,
       disableDepthTestDistance: Number.POSITIVE_INFINITY,
+      scaleByDistance: new Cesium.NearFarScalar(100, 1.4, 5000, 0.6),
     },
-    label: {
-      text: `${site.name}\n经:${site.longitude.toFixed(5)} 纬:${site.latitude.toFixed(5)}\n高:${(site.height || 0).toFixed(1)}m`,
-      font: 'bold 13px sans-serif',
-      fillColor: Cesium.Color.WHITE,
-      style: Cesium.LabelStyle.FILL_AND_OUTLINE,
-      outlineColor: Cesium.Color.fromCssColorString('#C41E24'),
-      outlineWidth: 2,
-      showBackground: true,
-      backgroundColor: Cesium.Color.fromCssColorString('#C41E24').withAlpha(0.85),
-      backgroundPadding: new Cesium.Cartesian2(8, 4),
+    // 将 label 替换为 billboard 以支持圆角背景
+    billboard: {
+      image: createSiteLabelCanvas(site.name),
+      horizontalOrigin: Cesium.HorizontalOrigin.CENTER,
       verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
-      pixelOffset: new Cesium.Cartesian2(0, -18),
+      pixelOffset: new Cesium.Cartesian2(0, -20), // 保持和点有一定的距离
+      scale: 0.5, // Canvas 画得很大（防糊），这里缩放显示
       disableDepthTestDistance: Number.POSITIVE_INFINITY,
+      scaleByDistance: new Cesium.NearFarScalar(100, 1.0, 5000, 0.6),
     },
+    // label: { ... } // 已移除
   })
 }
 
@@ -617,7 +679,10 @@ async function submitEditSite() {
     if (entity) {
       entity.position = Cesium.Cartesian3.fromDegrees(updated.longitude, updated.latitude, updated.height || 0)
       entity.name = updated.name
-      entity.label.text = `${updated.name}\n经:${updated.longitude.toFixed(5)} 纬:${updated.latitude.toFixed(5)}\n高:${(updated.height || 0).toFixed(1)}m`
+      // 更新 Billboard 图片
+      if (entity.billboard) {
+        entity.billboard.image = createSiteLabelCanvas(updated.name)
+      }
       // 更新 properties 缓存
       entity.properties.siteData = updated
     }
