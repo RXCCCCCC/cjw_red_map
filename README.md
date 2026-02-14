@@ -1,221 +1,275 @@
 # 程家湾红色资源数字地图
 
-这是程家湾红色资源数字地图项目源码（前后端 + 3D Tiles 数据）。
+> 江西省上饶市程家湾红色资源数字化展示平台——前后端 + 3D Tiles 一体化项目
 
-## 概览
-- 前端：Vue 3 + Vite + Pinia + Tailwind + Vant，CesiumJS 加载 3D Tiles
-- 后端：Flask + SQLAlchemy (MySQL)，提供 REST API 与 3D Tiles 静态代理
-- 数据：`backend/static/tiles/`（本地存放 3D Tiles），建议使用外部对象存储或 Git LFS
+## 技术栈
 
-## 目录结构（简化）
+| 层 | 技术 |
+|---|------|
+| 前端 | Vue 3 (Composition API) · Vite · Pinia · Tailwind CSS · Vant · CesiumJS |
+| 后端 | Flask · SQLAlchemy · PyMySQL |
+| 数据库 | **MySQL** >= 5.7（必须） |
+| 3D 数据 | CesiumJS 3D Tiles（存放于 `backend/static/tiles/`） |
+
+---
+
+## 项目目录结构
+
 ```
 cjw_red_map/
-├── backend/                 # Flask 后端
+├── backend/                        # Flask 后端
 │   ├── app/
-│   ├── static/tiles/        # 3D Tiles
-│   ├── requirements.txt
-│   └── run.py
-├── frontend/                # Vue 前端
-├── 开发路线规划.md
-└── 程家湾地图开发随记.md
+│   │   ├── __init__.py             # App factory：创建 Flask 实例、注册蓝图
+│   │   ├── config.py               # 数据库与路径配置（⚠️ 需修改 MySQL 密码）
+│   │   ├── models.py               # ORM 模型：Site / Media / AudioGuide
+│   │   ├── seeds.py                # 初始种子数据（由 sync_seeds.py 自动生成）
+│   │   ├── utils.py                # 通用工具函数
+│   │   └── routes/
+│   │       ├── site.py             # /api/sites      地标 CRUD
+│   │       ├── media.py            # /api/media       媒体 CRUD
+│   │       ├── audio_guide.py      # /api/audio-guides 语音导览
+│   │       ├── tiles.py            # /tiles/*         3D Tiles 静态代理
+│   │       └── upload.py           # /api/upload      文件上传
+│   ├── static/tiles/               # 3D Tiles 数据（较大，建议 Git LFS 或对象存储）
+│   ├── uploads/                    # 用户上传的图片/媒体文件
+│   ├── init_db.py                  # 初始化/重建数据库（⚠️ 会清空数据，谨慎使用）
+│   ├── run.py                      # Flask 开发服务器启动入口
+│   ├── sync_seeds.py               # 从本地 DB 导出并重写 seeds.py
+│   ├── export_db.py                # 生成 SQL 备份（可选）
+│   └── requirements.txt            # Python 依赖
+├── frontend/                       # Vue 3 前端
+│   ├── src/
+│   │   ├── main.js                 # 入口
+│   │   ├── App.vue                 # 根组件
+│   │   ├── api/index.js            # Axios 封装
+│   │   ├── components/
+│   │   │   ├── CesiumViewer.vue    # 3D 场景（Cesium + 地标渲染）
+│   │   │   ├── MapContainer.vue    # Leaflet 平面地图（备用）
+│   │   │   ├── AudioPlayer.vue     # 语音导览播放器
+│   │   │   ├── NavBar.vue          # 导航栏
+│   │   │   ├── SiteCard.vue        # 地标缩略卡片
+│   │   │   └── SitePopup.vue       # 地标弹窗
+│   │   ├── views/
+│   │   │   ├── HomeView.vue        # 首页
+│   │   │   ├── MapView.vue         # 地图浏览
+│   │   │   ├── SiteDetail.vue      # 地标详情
+│   │   │   ├── Model3DView.vue     # 3D 模型展示
+│   │   │   └── AboutView.vue       # 关于页
+│   │   ├── stores/                 # Pinia 状态管理
+│   │   ├── router/                 # Vue Router
+│   │   └── styles/                 # 全局样式
+│   ├── index.html
+│   ├── package.json
+│   ├── vite.config.js
+│   ├── tailwind.config.js
+│   └── postcss.config.js
+├── docs/                           # 开发文档
+│   ├── 开发日志.md
+│   ├── 开发路线规划.md
+│   └── 程家湾地图开发随记.md
+└── README.md
 ```
 
-## 快速启动（开发）
+---
+
+## 快速启动（本地开发）
 
 ### 前置要求
-- **Node.js** >= 16.x（推荐 18.x）
+
+- **Node.js** >= 16（推荐 18+）
 - **Python** >= 3.8
-- **MySQL** >= 5.7 或 MariaDB >= 10.3
+- **MySQL** >= 5.7 或 MariaDB >= 10.3（**必须**，本项目不使用 SQLite）
 
-### 后端部署
+### 1. 配置 MySQL
 
-#### 1. 配置数据库连接
-编辑 `backend/app/config.py` 或设置环境变量：
+确保 MySQL 服务已启动，然后配置数据库连接：
 
-```python
-# backend/app/config.py（可选：直接修改默认值）
-DB_HOST = os.getenv('DB_HOST', 'localhost')
-DB_PORT = os.getenv('DB_PORT', '3306')
-DB_USER = os.getenv('DB_USER', 'root')
-DB_PASSWORD = os.getenv('DB_PASSWORD', 'your_password')  # 修改为你的密码
-DB_NAME = os.getenv('DB_NAME', 'cjw_red_map')
-```
+**方式一：使用 .env 文件（推荐）**
 
-或通过环境变量（推荐生产环境）：
-
-```bash
-# Windows PowerShell
-$env:DB_PASSWORD="your_password"
-$env:DB_HOST="localhost"
-
-# Linux/Mac
-export DB_PASSWORD="your_password"
-export DB_HOST="localhost"
-```
-
-#### 2. 安装依赖
 ```bash
 cd backend
+cp .env.example .env
+# 编辑 .env 文件，修改 DB_PASSWORD 为你的 MySQL 密码
+```
+
+`.env` 文件示例：
+```bash
+# backend/.env
+SECRET_KEY=cjw-red-map-secret-2026
+
+DB_USER=root
+DB_PASSWORD=你的MySQL密码        # ← 填写你的实际密码
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_NAME=cjw_red_map
+```
+
+> ⚠️ **重要**：`.env` 文件已被 `.gitignore` 忽略，不会提交到 Git，确保密码安全。
+
+**方式二：通过系统环境变量设置（适用于生产环境）**
+
+```powershell
+# Windows PowerShell
+$env:DB_PASSWORD = "你的MySQL密码"
+```
+
+```bash
+# Linux / macOS
+export DB_PASSWORD="你的MySQL密码"
+```
+
+### 2. 启动后端
+
+```bash
+cd backend
+python -m venv .venv
+# Windows：
+.venv\Scripts\activate
+# Linux/macOS：
+# source .venv/bin/activate
+
 pip install -r requirements.txt
+python init_db.py          # ⚠️ 首次运行：创建数据库 + 表 + 种子数据（会清空已有数据！）
+python run.py              # Flask 启动于 http://127.0.0.1:5000
 ```
 
-#### 3. 初始化数据库（首次部署）
-```bash
-python init_db.py
-```
+### 3. 启动前端
 
-该脚本会自动：
-- 创建数据库（如不存在）
-- 创建所有表结构（Sites, Media, AudioGuides）
-- 插入 7 个初始红色地标数据
-
-**⚠️ 注意**：`init_db.py` 会清空现有数据！如需保留数据，请先备份。
-
-#### 4. 启动后端
-```bash
-python run.py
-# Flask 默认监听 http://127.0.0.1:5000
-# API 文档：http://127.0.0.1:5000/api/sites
-```
-
-### 前端部署
 ```bash
 cd frontend
 npm install
 npm run dev
-# 访问 http://localhost:5173
+# 打开浏览器访问 http://localhost:5173
+```
+
+### 4. 验证
+
+- 浏览器打开 http://localhost:5173 ，应可看到 3D 地图与 8 个红色地标
+- 后端 API 验证：访问 http://127.0.0.1:5000/api/sites ，应返回 `{"code": 0, "data": [...]}`
+
+---
+
+## 数据库管理与数据同步
+
+### 初始化数据库
+
+```bash
+cd backend
+python init_db.py
+```
+
+该脚本会：创建 `cjw_red_map` 数据库（如不存在）→ 清空所有表 → 重建表结构 → 插入 `seeds.py` 中的种子数据。
+
+> ⚠️ **警告**：`init_db.py` 会执行 `db.drop_all()`，运行前请备份重要数据！
+
+### 数据同步流程（确保多人一致）
+
+当你在本地通过编辑界面修改了地标坐标、描述或上传了图片后，这些改动只存在于你的本地 MySQL 和 `uploads/` 目录。为了让他人部署时看到相同数据，请执行：
+
+```bash
+cd backend
+# 第 1 步：从本地 MySQL 自动导出并更新 seeds.py
+python sync_seeds.py
+
+# 第 2 步：提交到 Git
+git add app/seeds.py
+git add ../backend/uploads/        # 如果有新增/修改的图片
+git commit -m "sync: 更新地标数据与媒体"
+git push
+```
+
+### SQL 备份（可选）
+
+```bash
+cd backend
+python export_db.py     # 在当前目录生成 database_backup.sql
 ```
 
 ---
 
-## 数据库管理
+## 他人从 GitHub 克隆后能否看到完全一样的效果？
 
-### 方式一：使用 init_db.py（推荐）
-**优点**：跨平台、不依赖 mysqldump、数据结构清晰可维护
+**结论：可以做到一致，但需要满足以下条件。**
 
-```bash
-cd backend
-python init_db.py  # 重建数据库并插入种子数据
-```
+| 条件 | 说明 |
+|------|------|
+| ✅ 地标位置、名称、描述 | 只要你在推送前运行了 `python sync_seeds.py` 并提交了 `seeds.py`，他人运行 `init_db.py` 后数据完全一致 |
+| ✅ 图片/媒体 | 只要 `backend/uploads/` 目录已提交到 Git（或媒体已上传到对象存储），图片可正常加载 |
+| ✅ 3D Tiles | 已包含在 `backend/static/tiles/` 中，克隆后即可使用 |
+| ⚠️ MySQL 密码 | 每台机器的 MySQL 密码不同，他人需创建 `.env` 文件并配置 `DB_PASSWORD`（见"快速启动"章节） |
+| ⚠️ Cesium Token | 如果 Cesium Ion Token 过期或无效，3D 场景可能无法加载地球底图（需配置自己的 Token） |
 
-所有初始地标数据存放在 `backend/app/seeds.py`，可直接编辑后运行 `init_db.py` 同步。
+**总结**：只要你每次修改数据后执行 `sync_seeds.py` → 提交 `seeds.py` + `uploads/` → 推送，他人克隆后只需：
+1. 创建 `.env` 文件并配置 MySQL 密码（`cp .env.example .env`，然后修改 `DB_PASSWORD`）
+2. 运行 `python init_db.py`
+3. 启动前后端
 
-### 方式二：SQL 导出/导入（可选）
-如需导出当前数据库为 SQL 文件（用于分享或迁移）：
-
-```bash
-cd backend
-python export_db.py  # 生成 database_backup.sql
-```
-
-他人导入 SQL 文件：
-
-```bash
-# 1. 创建空数据库
-mysql -u root -p -e "CREATE DATABASE cjw_red_map CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
-
-# 2. 导入数据
-mysql -u root -p cjw_red_map < database_backup.sql
-```
+即可看到与你完全相同的地标位置、图片和 3D 场景。
 
 ---
 
-## 项目部署到 GitHub
-
-### 需要上传的内容
-✅ **代码**：`backend/`、`frontend/`（全部代码）  
-✅ **数据库初始化脚本**：`backend/init_db.py`、`backend/app/seeds.py`  
-✅ **3D Tiles**：`backend/static/tiles/`（如文件较大，建议使用 Git LFS 或改用对象存储）  
-✅ **文档**：`README.md`、`docs/`
-
-❌ **不要上传**：
-- `.env`（环境变量配置文件，包含密码）
-- `backend/__pycache__/`、`frontend/node_modules/`
-- `database_backup.sql`（如果包含敏感数据）
-- `backend/uploads/`（用户上传的媒体文件，建议用对象存储）
-
-### 配置 .gitignore
-
-在项目根目录创建 `.gitignore`：
+## .gitignore 建议
 
 ```gitignore
 # Python
 __pycache__/
 *.py[cod]
-*.so
-.Python
-env/
-venv/
 .venv/
 
 # Node.js
 node_modules/
 dist/
-*.local
 
-# 环境变量和敏感配置
+# 环境变量（不要提交密码）
 .env
-*.env
-backend/app/config_local.py
 
 # 数据库备份
 *.sql
-database_backup*.sql
-
-# 用户上传文件
-backend/uploads/
-!backend/uploads/.gitkeep
 
 # IDE
 .vscode/
 .idea/
-*.swp
-*.swo
 
-# 操作系统
+# OS
 .DS_Store
 Thumbs.db
 ```
 
-### 部署流程
+> 注意：`backend/uploads/` 目前允许提交（演示用途）。生产环境建议迁移到对象存储（OSS/COS），详见 `docs/图片同步方案.md`。
 
-1. **提交代码到 GitHub**
+---
 
-```bash
-git init
-git add .
-git commit -m "初始提交：程家湾红色地图项目"
-git branch -M main
-git remote add origin https://github.com/your-username/cjw-red-map.git
-git push -u origin main
-```
+## API 概览
 
-2. **他人克隆并部署**
+| 方法 | 路径 | 说明 |
+|------|------|------|
+| GET | `/api/sites` | 获取所有地标 |
+| GET | `/api/sites/:id` | 获取单个地标详情（含媒体与导览） |
+| POST | `/api/sites` | 新增地标 |
+| PUT | `/api/sites/:id` | 更新地标 |
+| DELETE | `/api/sites/:id` | 删除地标 |
+| GET | `/api/media/:site_id` | 获取某地标的媒体列表 |
+| POST | `/api/upload` | 上传文件 |
+| GET | `/uploads/:filename` | 访问已上传的媒体文件 |
+| GET | `/tiles/*` | 3D Tiles 静态代理 |
 
-```bash
-# 克隆仓库
-git clone https://github.com/your-username/cjw-red-map.git
-cd cjw-red-map
-
-# 后端部署
-cd backend
-pip install -r requirements.txt
-# 修改 config.py 中的数据库密码
-python init_db.py  # 自动创建数据库和初始数据
-python run.py
-
-# 前端部署（新开终端）
-cd ../frontend
-npm install
-npm run dev
-```
+所有 API 返回格式：`{"code": 0, "data": ...}` 或 `{"code": 0, "msg": "..."}`。
 
 ---
 
 ## 生产环境建议
 
-- **数据库**：使用云数据库（如阿里云 RDS、腾讯云 CDB）或自建 MySQL 并定期备份
-- **敏感配置**：通过环境变量管理密码，不要硬编码在 `config.py`
-- **3D Tiles**：使用对象存储（如 OSS、COS）托管大文件，避免 Git 仓库过大
-- **HTTPS**：生产环境必须启用 HTTPS（使用 Nginx + Let's Encrypt）
-- **进程管理**：使用 Gunicorn + Supervisor 或 Docker 部署后端
+- **数据库**：使用云 MySQL（阿里云 RDS / 腾讯云 CDB），通过环境变量配置连接
+- **敏感信息**：密码、Token 等通过环境变量管理，不硬编码在代码中
+- **媒体文件**：迁移到对象存储（OSS/COS/S3），避免 Git 仓库膨胀
+- **HTTPS**：使用 Nginx 反向代理 + Let's Encrypt 证书
+- **进程管理**：使用 Gunicorn + Supervisor 或 Docker 部署 Flask
+
+---
+
+## 文档
+
+- [开发日志](docs/开发日志.md) — 每次功能变更的详细记录
+- [开发路线规划](docs/开发路线规划.md) — 项目规划与里程碑
+- [开发随记](docs/程家湾地图开发随记.md) — 技术探索笔记
+- [图片同步方案](docs/图片同步方案.md) — 媒体文件分发策略对比

@@ -7,6 +7,7 @@ env/
 venv/
 .venv/
 ENV/
+# 环境变量配置文件（包含敏感信息如数据库密码）
 .env
 
 # Node
@@ -36,7 +37,8 @@ logs/
 Thumbs.db
 
 # Backend uploads and local files
-backend/uploads/
+# backend/uploads/  # 注释掉以允许提交图片（临时方案）
+# 生产环境建议使用对象存储（OSS/COS）托管图片，详见 docs/图片同步方案.md
 
 # 3D tiles (do not commit large binary tiles). If you want to include them, use Git LFS instead.
 backend/static/tiles/
