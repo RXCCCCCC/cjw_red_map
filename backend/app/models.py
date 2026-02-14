@@ -88,3 +88,35 @@ class AudioGuide(db.Model):
             'sort_order': self.sort_order,
             'created_at': self.created_at.isoformat() if self.created_at else None,
         }
+
+
+class Route(db.Model):
+    """用户绘制的3D漫游路径"""
+    __tablename__ = 'routes'
+
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    name = db.Column(db.String(100), nullable=False, comment='路径名称')
+    description = db.Column(db.Text, comment='路径描述')
+    # 使用 JSON 类型存储点位（MySQL 5.7+ 支持原生 JSON）
+    # 格式: [[lng, lat, height], [lng, lat, height], ...]
+    points = db.Column(db.JSON, nullable=False, comment='路径点位数据')
+    
+    # 样式配置
+    line_color = db.Column(db.String(20), default='#FFFF00', comment='线条颜色')
+    width = db.Column(db.Integer, default=5, comment='线条宽度')
+    is_visible = db.Column(db.Boolean, default=True, comment='是否显示')
+    
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'name': self.name,
+            'description': self.description,
+            'points': self.points,
+            'line_color': self.line_color,
+            'width': self.width,
+            'is_visible': self.is_visible,
+            'created_at': self.created_at.isoformat() if self.created_at else None
+        }
+

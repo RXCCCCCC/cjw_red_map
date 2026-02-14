@@ -29,6 +29,15 @@
             :class="editAction === 'drag' ? 'bg-blue-600 text-white' : 'bg-white/90 hover:bg-white'"
             @click="editAction = editAction === 'drag' ? null : 'drag'"
           >✋ 拖动调整</button>
+          <button
+            class="px-2 py-1 text-[11px] rounded-md shadow"
+            :class="isDrawingPath ? 'bg-purple-600 text-white' : 'bg-white/90 hover:bg-white'"
+            @click="toggleDrawingMode"
+          >✏️ 绘制路径</button>
+          <button
+            class="px-2 py-1 text-[11px] bg-white/90 hover:bg-white rounded-md shadow"
+            @click="showRoutesList = true"
+          >📋 路径列表</button>
         </div>
         <div v-if="editAction === 'add'" class="bg-green-100 text-green-800 px-2 py-1 rounded text-[10px]">
           点击地图任意位置添加新地标点
@@ -36,8 +45,118 @@
         <div v-if="editAction === 'drag'" class="bg-blue-100 text-blue-800 px-2 py-1 rounded text-[10px]">
           按住左键拖动地标标注点移动位置
         </div>
+        <div v-if="isDrawingPath" class="bg-purple-100 text-purple-800 px-2 py-1 rounded text-[10px] flex items-center justify-between gap-2">
+          <span>已绘制 {{ currentPathPoints.length }} 个点 (点击地图添加)</span>
+          <div class="flex gap-1">
+            <button class="bg-white border px-1 rounded hover:bg-gray-50" @click="undoLastPoint" v-if="currentPathPoints.length > 0">撤销</button>
+            <button class="bg-purple-600 text-white px-2 rounded hover:bg-purple-700" @click="finishDrawing" v-if="currentPathPoints.length >= 2">完成</button>
+            <button class="bg-gray-400 text-white px-1 rounded hover:bg-gray-500" @click="cancelDrawing">取消</button>
+          </div>
+        </div>
       </template>
     </div>
+
+    <!-- ════════ 保存路径对话框 ════════ -->
+    <Transition name="popup-fade">
+      <div v-if="showSavePathDialog" class="absolute inset-0 z-50 flex items-center justify-center bg-black/40">
+        <div class="bg-white rounded-xl shadow-2xl p-5 w-80">
+          <h3 class="text-sm font-bold text-gray-800 mb-3">💾 保存游览路径</h3>
+          <div class="space-y-3">
+            <div>
+              <label class="block text-xs text-gray-500 mb-1">路径名称 *</label>
+              <input v-model="pathForm.name" class="w-full border rounded px-2 py-1.5 text-sm" placeholder="如：红色之旅路线A" />
+            </div>
+            <div>
+              <label class="block text-xs text-gray-500 mb-1">描述</label>
+              <textarea v-model="pathForm.description" rows="3" class="w-full border rounded px-2 py-1.5 text-sm" placeholder="路径简介..." />
+            </div>
+          </div>
+          <div class="flex gap-2 mt-4">
+            <button
+              class="flex-1 px-3 py-1.5 text-xs bg-gray-200 rounded-lg hover:bg-gray-300"
+              @click="showSavePathDialog = false"
+            >取消</button>
+            <button
+              class="flex-1 px-3 py-1.5 text-xs bg-purple-600 text-white rounded-lg hover:bg-purple-700"
+              @click="savePath"
+              :disabled="!pathForm.name"
+            >保存</button>
+          </div>
+        </div>
+      </div>
+    </Transition>
+
+    <!-- ════════ 路径列表对话框 ════════ -->
+    <Transition name="popup-fade">
+      <div v-if="showRoutesList" class="absolute inset-0 z-50 flex items-center justify-center bg-black/40">
+        <div class="bg-white rounded-xl shadow-2xl p-5 w-96 max-h-[80vh] flex flex-col">
+          <div class="flex justify-between items-center mb-3">
+            <h3 class="text-sm font-bold text-gray-800">📋 已保存的路径</h3>
+            <button @click="showRoutesList = false" class="text-gray-400 hover:text-gray-600">✕</button>
+          </div>
+          <div class="flex-1 overflow-y-auto min-h-[200px]">
+            <div v-if="savedRoutes.length === 0" class="text-center text-gray-400 py-8 text-xs">暂无保存的路径</div>
+            <div v-else class="space-y-2">
+              <div v-for="route in savedRoutes" :key="route.id" class="border rounded p-2 hover:bg-gray-50 flex justify-between items-center group">
+                <div>
+                  <div class="font-bold text-xs text-gray-800">{{ route.name }}</div>
+                  <div class="text-[10px] text-gray-500 truncate max-w-[180px]">{{ route.description || '无描述' }}</div>
+                </div>
+                <div class="flex gap-1 opacity-0 group-hover:opacity-100 transition">
+                  <button class="text-green-600 text-[10px] hover:underline" @click="copyRoute(route)">复制</button>
+                  <button class="text-red-500 text-[10px] hover:underline" @click="confirmDeleteRoute(route.id)">删除</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </Transition>
+
+    <!-- ════════ 路径导航对话框 ════════ -->
+    <Transition name="popup-fade">
+      <div v-if="showNavigationDialog" class="absolute inset-0 z-50 flex items-center justify-center bg-black/40">
+        <div class="bg-white rounded-xl shadow-2xl p-5 w-96 max-h-[80vh] flex flex-col">
+          <div class="flex justify-between items-center mb-3">
+            <h3 class="text-sm font-bold text-gray-800">🧭 选择导航路径</h3>
+            <button @click="closeNavigation" class="text-gray-400 hover:text-gray-600">✕</button>
+          </div>
+          <div class="flex-1 overflow-y-auto min-h-[200px]">
+            <div v-if="savedRoutes.length === 0" class="text-center text-gray-400 py-8 text-xs">暂无可用路径</div>
+            <div v-else class="space-y-2">
+              <div 
+                v-for="route in savedRoutes" 
+                :key="route.id" 
+                class="border rounded p-3 cursor-pointer transition"
+                :class="activeNavigationRoute?.id === route.id ? 'bg-blue-50 border-blue-500' : 'hover:bg-gray-50 border-gray-200'"
+                @click="startNavigation(route)"
+              >
+                <div class="flex items-center justify-between">
+                  <div class="flex-1">
+                    <div class="font-bold text-sm text-gray-800 flex items-center gap-2">
+                      {{ route.name }}
+                      <span v-if="activeNavigationRoute?.id === route.id" class="text-blue-600 text-xs">✓ 已选择</span>
+                    </div>
+                    <div class="text-[10px] text-gray-500 mt-0.5">{{ route.description || '无描述' }}</div>
+                  </div>
+                  <div v-if="activeNavigationRoute?.id === route.id" class="text-blue-600">
+                    🧭
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div v-if="activeNavigationRoute" class="mt-3 pt-3 border-t">
+            <button 
+              class="w-full px-3 py-2 text-sm bg-red-500 text-white rounded-lg hover:bg-red-600 transition"
+              @click="stopNavigation"
+            >
+              停止导航
+            </button>
+          </div>
+        </div>
+      </div>
+    </Transition>
 
     <!-- ════════ 密码对话框 ════════ -->
     <Transition name="popup-fade">
@@ -263,7 +382,7 @@
 import { ref, onMounted, onBeforeUnmount, inject, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import * as Cesium from 'cesium'
-import { getSites, getSite, createSite, updateSite, deleteSite as apiDeleteSite, getSiteMedia, createMedia, deleteMedia, uploadFile } from '@/api'
+import { getSites, getSite, createSite, updateSite, deleteSite as apiDeleteSite, getSiteMedia, createMedia, deleteMedia, uploadFile, getRoutes, createRoute, deleteRoute } from '@/api'
 
 const cesiumContainer = ref(null)
 const selectedSite = ref(null)
@@ -275,6 +394,7 @@ let clickHandler = null
 let dragHandler = null
 
 const registerResetView = inject('registerResetView', null)
+const registerShowNavigation = inject('registerShowNavigation', null)
 
 /* ══════ 编辑模式状态 ══════ */
 const EDIT_PASSWORD = '114514'
@@ -859,6 +979,330 @@ onBeforeUnmount(() => {
   if (clickHandler) { clickHandler.destroy(); clickHandler = null }
   if (viewer) { viewer.destroy(); viewer = null }
 })
+
+/* ══════ 路径绘制相关 ══════ */
+const isDrawingPath = ref(false)
+const currentPathPoints = ref([]) // cartesian3
+const tempPolylineEntity = ref(null)
+const showSavePathDialog = ref(false)
+const pathForm = ref({ name: '', description: '' })
+const showRoutesList = ref(false)
+const savedRoutes = ref([])
+const floatingPoint = ref(null) // 鼠标悬停的实时点
+let drawingHandler = null
+
+/* ══════ 路径导航相关 ══════ */
+const showNavigationDialog = ref(false)
+const activeNavigationRoute = ref(null)
+const navigationPolylineEntity = ref(null)
+
+// 注册导航功能到父组件
+if (registerShowNavigation) {
+    registerShowNavigation(() => {
+        showNavigationDialog.value = true
+    })
+}
+
+function startNavigation(route) {
+    // 清除之前的导航路径高亮
+    if (navigationPolylineEntity.value) {
+        try {
+            viewer.entities.remove(navigationPolylineEntity.value)
+        } catch(e) {
+            // 如果实体不存在，忽略错误
+            console.warn('清除旧路径实体失败:', e)
+        }
+        navigationPolylineEntity.value = null
+    }
+    
+    // 设置当前活动路径
+    activeNavigationRoute.value = route
+    
+    // 解析路径点位
+    let points = route.points
+    if (typeof points === 'string') {
+        try { points = JSON.parse(points) } catch(e){}
+    }
+    if (!Array.isArray(points)) return
+    
+    // 创建高亮路径（使用不同颜色区分）
+    const positions = points.map(p => Cesium.Cartesian3.fromDegrees(p[0], p[1], p[2] + 1))
+    
+    navigationPolylineEntity.value = viewer.entities.add({
+        id: 'navigation-active-route',
+        name: `导航: ${route.name}`,
+        polyline: {
+            positions: positions,
+            width: 8,
+            material: new Cesium.PolylineGlowMaterialProperty({
+                glowPower: 0.25,
+                color: Cesium.Color.CYAN
+            }),
+            clampToGround: true
+        }
+    })
+    
+    // 飞向路径
+    viewer.flyTo(navigationPolylineEntity.value, {
+        duration: 2,
+        offset: new Cesium.HeadingPitchRange(0, Cesium.Math.toRadians(-45), positions.length > 5 ? 500 : 200)
+    })
+}
+
+function stopNavigation() {
+    // 清除导航高亮
+    if (navigationPolylineEntity.value) {
+        try {
+            viewer.entities.remove(navigationPolylineEntity.value)
+        } catch(e) {
+            console.warn('清除导航路径失败:', e)
+        }
+        navigationPolylineEntity.value = null
+    }
+    activeNavigationRoute.value = null
+}
+
+function closeNavigation() {
+    showNavigationDialog.value = false
+}
+
+// 加载已有路径（仅加载数据，不自动渲染到地图）
+onMounted(async () => {
+    try {
+        const res = await getRoutes()
+        if (res.data.code === 0) {
+            savedRoutes.value = res.data.data
+            // 不再自动渲染所有路径，只有导航时才显示
+        }
+    } catch (e) { console.error('Failed to load routes', e) }
+})
+
+/* ── 切换绘制模式 ── */
+function toggleDrawingMode() {
+  if (isDrawingPath.value) {
+    cancelDrawing()
+  } else {
+    isDrawingPath.value = true
+    editAction.value = null
+    currentPathPoints.value = []
+    
+    if (tempPolylineEntity.value) {
+        viewer.entities.remove(tempPolylineEntity.value)
+    }
+    // 创建临时线
+    tempPolylineEntity.value = viewer.entities.add({
+      polyline: {
+        positions: new Cesium.CallbackProperty(() => {
+            // 如果正在鼠标移动中有临时点，组合展示
+            if (floatingPoint.value && currentPathPoints.value.length > 0) {
+                return [...currentPathPoints.value, floatingPoint.value]
+            }
+            return currentPathPoints.value
+        }, false),
+        width: 5,
+        material: Cesium.Color.YELLOW.withAlpha(0.8),
+        clampToGround: true
+      }
+    })
+    
+    setupDrawingHandler()
+  }
+}
+
+function setupDrawingHandler() {
+  if (drawingHandler) drawingHandler.destroy()
+  drawingHandler = new Cesium.ScreenSpaceEventHandler(viewer.canvas)
+
+  // 左键点击：添加固定点
+  drawingHandler.setInputAction((click) => {
+    // 忽略点击起止位置距离过大的操作（这是拖动，不是点击）- Cesium 内部通常已处理 click vs drag，但防止误触
+    // 下面直接获取点击位置
+    const cartesian = pickPosition(click.position)
+    if (cartesian) {
+      currentPathPoints.value.push(cartesian)
+    }
+  }, Cesium.ScreenSpaceEventType.LEFT_CLICK)
+  
+  // 鼠标移动：更新浮动点（橡皮筋效果）
+  drawingHandler.setInputAction((movement) => {
+      if (currentPathPoints.value.length > 0) {
+          const cartesian = pickPosition(movement.endPosition)
+          if (cartesian) {
+              floatingPoint.value = cartesian
+          }
+      }
+  }, Cesium.ScreenSpaceEventType.MOUSE_MOVE)
+  
+  // 右键点击：结束绘制
+  drawingHandler.setInputAction(() => {
+    if (currentPathPoints.value.length >= 2) finishDrawing()
+  }, Cesium.ScreenSpaceEventType.RIGHT_CLICK)
+}
+
+function undoLastPoint() {
+  if (currentPathPoints.value.length > 0) currentPathPoints.value.pop()
+}
+
+function finishDrawing() {
+  if (currentPathPoints.value.length < 2) return alert('请至少绘制2个点')
+  
+  // 暂停监听
+  if (drawingHandler) {
+      drawingHandler.destroy()
+      drawingHandler = null
+  }
+  floatingPoint.value = null // 清除浮动点
+  showSavePathDialog.value = true
+}
+
+function cancelDrawing() {
+  isDrawingPath.value = false
+  currentPathPoints.value = []
+  floatingPoint.value = null
+  if (tempPolylineEntity.value) {
+    viewer.entities.remove(tempPolylineEntity.value)
+    tempPolylineEntity.value = null
+  }
+  if (drawingHandler) {
+    drawingHandler.destroy()
+    drawingHandler = null
+  }
+  showSavePathDialog.value = false
+}
+
+async function savePath() {
+   if (!pathForm.value.name) return
+   
+   // 转换坐标为 [lon, lat, height] 数组
+   const pointsData = currentPathPoints.value.map(c => {
+       const carto = Cesium.Cartographic.fromCartesian(c)
+       return [
+           Cesium.Math.toDegrees(carto.longitude),
+           Cesium.Math.toDegrees(carto.latitude),
+           carto.height
+       ]
+   })
+
+   try {
+       const res = await createRoute({
+           name: pathForm.value.name,
+           description: pathForm.value.description,
+           points: pointsData,
+           line_color: '#FFFF00',
+           width: 5
+       })
+       if (res.data.code === 0) {
+           const newRoute = res.data.data
+           savedRoutes.value.unshift(newRoute)
+           // 不自动渲染新保存的路径，用户可通过导航查看
+           alert('路径保存成功')
+           cancelDrawing()
+           pathForm.value = { name: '', description: '' }
+       }
+   } catch (e) {
+       console.error(e)
+       alert('保存失败: ' + (e.response?.data?.msg || e.message))
+   }
+}
+
+function renderRoute(route) {
+    if (!viewer) return
+    // 解析 points
+    let points = route.points
+    if (typeof points === 'string') {
+        try { points = JSON.parse(points) } catch(e){}
+    }
+    
+    if (!Array.isArray(points)) return
+
+    const positions = points.map(p => Cesium.Cartesian3.fromDegrees(p[0], p[1], p[2] + 0.5))
+    
+    viewer.entities.add({
+        id: 'route-' + route.id,
+        name: route.name,
+        description: route.description,
+        polyline: {
+            positions: positions,
+            width: route.width || 5,
+            material: Cesium.Color.fromCssColorString(route.line_color || '#FFFF00').withAlpha(0.8),
+            clampToGround: true
+        }
+    })
+}
+
+function copyRoute(route) {
+    if (!confirm(`确定要复制路径「${route.name}」并开始编辑吗？`)) return
+    
+    // 1. 关闭列表，退出其他模式
+    showRoutesList.value = false
+    if (isDrawingPath.value) cancelDrawing()
+    
+    // 2. 解析点位数据
+    let points = route.points
+    if (typeof points === 'string') {
+        try { points = JSON.parse(points) } catch(e){}
+    }
+    if (!Array.isArray(points)) return alert('无法解析路径数据')
+
+    // 3. 转换为 Cartesian3 并初始化绘制状态
+    isDrawingPath.value = true
+    editAction.value = null
+    currentPathPoints.value = points.map(p => Cesium.Cartesian3.fromDegrees(p[0], p[1], p[2] + 0.5))
+    
+    // 预填名称
+    pathForm.value.name = route.name + ' (副本)'
+    pathForm.value.description = route.description
+    
+    // 4. 创建临时线实体（与 toggleDrawingMode 逻辑一致）
+    if (tempPolylineEntity.value) {
+        viewer.entities.remove(tempPolylineEntity.value)
+    }
+    tempPolylineEntity.value = viewer.entities.add({
+      polyline: {
+        positions: new Cesium.CallbackProperty(() => {
+            if (floatingPoint.value && currentPathPoints.value.length > 0) {
+                return [...currentPathPoints.value, floatingPoint.value]
+            }
+            return currentPathPoints.value
+        }, false),
+        width: 5,
+        material: Cesium.Color.YELLOW.withAlpha(0.8),
+        clampToGround: true
+      }
+    })
+    
+    // 5. 启动交互处理器
+    setupDrawingHandler()
+    
+    // 6. 视角飞向新路径起点
+    if (currentPathPoints.value.length > 0) {
+        viewer.camera.flyTo({
+            destination: currentPathPoints.value[0],
+            duration: 1.5
+        })
+    }
+}
+
+async function confirmDeleteRoute(id) {
+    if (!confirm('确定删除该路径吗？')) return
+    try {
+        const res = await deleteRoute(id)
+        if (res.data.code === 0) {
+            savedRoutes.value = savedRoutes.value.filter(r => r.id !== id)
+            // 如果删除的是当前导航路径，清除导航
+            if (activeNavigationRoute.value?.id === id) {
+                stopNavigation()
+            }
+        }
+    } catch (e) { console.error(e) }
+}
+
+// flyToRoute 不再需要，因为路径不会预先渲染
+// function flyToRoute(route) {
+//     const entity = viewer.entities.getById('route-' + route.id)
+//     if (entity) viewer.flyTo(entity)
+// }
+
 </script>
 
 <style scoped>

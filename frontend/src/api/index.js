@@ -12,6 +12,11 @@ export const createSite = (data) => api.post('/sites', data)
 export const updateSite = (id, data) => api.put(`/sites/${id}`, data)
 export const deleteSite = (id) => api.delete(`/sites/${id}`)
 
+// ─── 用户绘制路径 ───
+export const getRoutes = () => api.get('/routes')
+export const createRoute = (data) => api.post('/routes', data)
+export const deleteRoute = (id) => api.delete(`/routes/${id}`)
+
 // ─── 媒体 ───
 export const getSiteMedia = (siteId) => api.get(`/sites/${siteId}/media`)
 export const createMedia = (data) => api.post('/media', data)

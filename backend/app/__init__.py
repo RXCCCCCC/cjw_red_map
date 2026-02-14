@@ -26,12 +26,14 @@ def create_app():
     from app.routes.audio_guide import audio_guide_bp
     from app.routes.tiles import tiles_bp
     from app.routes.upload import upload_bp
+    from app.routes.route_paths import route_paths_bp
 
     app.register_blueprint(site_bp, url_prefix='/api')
     app.register_blueprint(media_bp, url_prefix='/api')
     app.register_blueprint(audio_guide_bp, url_prefix='/api')
     app.register_blueprint(tiles_bp)
     app.register_blueprint(upload_bp, url_prefix='/api')
+    app.register_blueprint(route_paths_bp, url_prefix='/api')
 
     # 提供 /uploads/<filename> 静态访问（上传的媒体文件）
     import os
