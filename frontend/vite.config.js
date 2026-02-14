@@ -16,6 +16,30 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url)),
+      '@zip.js/zip.js/lib/zip-no-worker.js': '@zip.js/zip.js',
+    },
+  },
+  optimizeDeps: {
+    exclude: ['@cesium/engine'],
+    esbuildOptions: {
+      supported: {
+        'top-level-await': true,
+      },
+    },
+    include: [
+      'mersenne-twister', 
+      'urijs', 
+      'grapheme-splitter',
+      'pako',
+      'protobufjs/minimal',
+      'bitmap-sdf',
+      'earcut',
+      'lerc',
+    ],
+  },
+  build: {
+    commonjsOptions: {
+      transformMixedEsModules: true,
     },
   },
   server: {
