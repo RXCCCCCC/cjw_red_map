@@ -15,6 +15,7 @@ def create_app():
         r"/api/*": {"origins": "*"},
         r"/tiles/*": {"origins": "*"},
         r"/uploads/*": {"origins": "*"},
+        r"/recorder/*": {"origins": "*"},
     })
 
     # 数据库
@@ -44,5 +45,14 @@ def create_app():
     @app.route('/uploads/<path:filename>')
     def serve_upload(filename):
         return send_from_directory(upload_dir, filename)
+
+    # 提供 /recorder/<filename> 静态访问
+    recorder_dir = app.config.get('RECORDER_DIR')
+    if recorder_dir:
+        os.makedirs(recorder_dir, exist_ok=True)
+
+        @app.route('/recorder/<path:filename>')
+        def serve_recorder(filename):
+            return send_from_directory(recorder_dir, filename)
 
     return app

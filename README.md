@@ -4,12 +4,12 @@
 
 ## 技术栈
 
-| 层 | 技术 |
-|---|------|
-| 前端 | Vue 3 (Composition API) · Vite · Pinia · Tailwind CSS · Vant · CesiumJS |
-| 后端 | Flask · SQLAlchemy · PyMySQL |
-| 数据库 | **MySQL** >= 5.7（必须） |
-| 3D 数据 | CesiumJS 3D Tiles（存放于 `backend/static/tiles/`） |
+| 层      | 技术                                                                    |
+| ------- | ----------------------------------------------------------------------- |
+| 前端    | Vue 3 (Composition API) · Vite · Pinia · Tailwind CSS · Vant · CesiumJS |
+| 后端    | Flask · SQLAlchemy · PyMySQL                                            |
+| 数据库  | **MySQL** >= 5.7（必须）                                                |
+| 3D 数据 | CesiumJS 3D Tiles（存放于 `backend/static/tiles/`）                     |
 
 ---
 
@@ -93,6 +93,7 @@ cp .env.example .env
 ```
 
 `.env` 文件示例：
+
 ```bash
 # backend/.env
 SECRET_KEY=cjw-red-map-secret-2026
@@ -124,7 +125,7 @@ export DB_PASSWORD="你的MySQL密码"
 cd backend
 python -m venv .venv
 # Windows：
-.venv\Scripts\activate
+.\venv\Scripts\Activate.ps1
 # Linux/macOS：
 # source .venv/bin/activate
 
@@ -191,15 +192,16 @@ python export_db.py     # 在当前目录生成 database_backup.sql
 
 **结论：可以做到一致，但需要满足以下条件。**
 
-| 条件 | 说明 |
-|------|------|
+| 条件                    | 说明                                                                                                  |
+| ----------------------- | ----------------------------------------------------------------------------------------------------- |
 | ✅ 地标位置、名称、描述 | 只要你在推送前运行了 `python sync_seeds.py` 并提交了 `seeds.py`，他人运行 `init_db.py` 后数据完全一致 |
-| ✅ 图片/媒体 | 只要 `backend/uploads/` 目录已提交到 Git（或媒体已上传到对象存储），图片可正常加载 |
-| ✅ 3D Tiles | 已包含在 `backend/static/tiles/` 中，克隆后即可使用 |
-| ⚠️ MySQL 密码 | 每台机器的 MySQL 密码不同，他人需创建 `.env` 文件并配置 `DB_PASSWORD`（见"快速启动"章节） |
-| ⚠️ Cesium Token | 如果 Cesium Ion Token 过期或无效，3D 场景可能无法加载地球底图（需配置自己的 Token） |
+| ✅ 图片/媒体            | 只要 `backend/uploads/` 目录已提交到 Git（或媒体已上传到对象存储），图片可正常加载                    |
+| ✅ 3D Tiles             | 已包含在 `backend/static/tiles/` 中，克隆后即可使用                                                   |
+| ⚠️ MySQL 密码           | 每台机器的 MySQL 密码不同，他人需创建 `.env` 文件并配置 `DB_PASSWORD`（见"快速启动"章节）             |
+| ⚠️ Cesium Token         | 如果 Cesium Ion Token 过期或无效，3D 场景可能无法加载地球底图（需配置自己的 Token）                   |
 
 **总结**：只要你每次修改数据后执行 `sync_seeds.py` → 提交 `seeds.py` + `uploads/` → 推送，他人克隆后只需：
+
 1. 创建 `.env` 文件并配置 MySQL 密码（`cp .env.example .env`，然后修改 `DB_PASSWORD`）
 2. 运行 `python init_db.py`
 3. 启动前后端
@@ -241,17 +243,17 @@ Thumbs.db
 
 ## API 概览
 
-| 方法 | 路径 | 说明 |
-|------|------|------|
-| GET | `/api/sites` | 获取所有地标 |
-| GET | `/api/sites/:id` | 获取单个地标详情（含媒体与导览） |
-| POST | `/api/sites` | 新增地标 |
-| PUT | `/api/sites/:id` | 更新地标 |
-| DELETE | `/api/sites/:id` | 删除地标 |
-| GET | `/api/media/:site_id` | 获取某地标的媒体列表 |
-| POST | `/api/upload` | 上传文件 |
-| GET | `/uploads/:filename` | 访问已上传的媒体文件 |
-| GET | `/tiles/*` | 3D Tiles 静态代理 |
+| 方法   | 路径                  | 说明                             |
+| ------ | --------------------- | -------------------------------- |
+| GET    | `/api/sites`          | 获取所有地标                     |
+| GET    | `/api/sites/:id`      | 获取单个地标详情（含媒体与导览） |
+| POST   | `/api/sites`          | 新增地标                         |
+| PUT    | `/api/sites/:id`      | 更新地标                         |
+| DELETE | `/api/sites/:id`      | 删除地标                         |
+| GET    | `/api/media/:site_id` | 获取某地标的媒体列表             |
+| POST   | `/api/upload`         | 上传文件                         |
+| GET    | `/uploads/:filename`  | 访问已上传的媒体文件             |
+| GET    | `/tiles/*`            | 3D Tiles 静态代理                |
 
 所有 API 返回格式：`{"code": 0, "data": ...}` 或 `{"code": 0, "msg": "..."}`。
 

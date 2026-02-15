@@ -36,15 +36,36 @@
 
       <!-- 语音导览 -->
       <section class="px-4 pb-3" v-if="site.audio_guides?.length">
-        <h3 class="text-red-primary font-semibold text-base mb-3 flex items-center gap-1">
-          🎧 语音导览
-        </h3>
-        <div class="space-y-3">
-          <AudioPlayer
+        <div class="flex items-center justify-between mb-3">
+          <h3 class="text-red-primary font-semibold text-base flex items-center gap-1">
+            🎧 语音导览
+          </h3>
+          <button
+            class="px-3 py-1 bg-red-primary text-white text-xs rounded-full flex items-center gap-1 active:opacity-80"
+            @click="playFirstGuide"
+          >
+            <template v-if="isPlayingThisSite">
+              <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 24 24">
+                <rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/>
+              </svg>
+              <span>暂停讲解</span>
+            </template>
+            <template v-else>
+              <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M8 5v14l11-7z"/>
+              </svg>
+              <span>播放讲解</span>
+            </template>
+          </button>
+        </div>
+        <div class="bg-gray-50 rounded-lg p-3">
+          <p
             v-for="guide in site.audio_guides"
             :key="guide.id"
-            :guide="guide"
-          />
+            class="text-gray-600 text-xs leading-relaxed mb-2 last:mb-0"
+          >
+            {{ guide.transcript }}
+          </p>
         </div>
       </section>
 
@@ -95,21 +116,39 @@
 import { computed, onMounted, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { useSiteStore } from '@/stores/site'
+import { useAudioStore } from '@/stores/audio'
 import { storeToRefs } from 'pinia'
 import NavBar from '@/components/NavBar.vue'
 import AudioPlayer from '@/components/AudioPlayer.vue'
 
 const route = useRoute()
 const siteStore = useSiteStore()
+const audioStore = useAudioStore()
 const { currentSite: site, loading } = storeToRefs(siteStore)
 
 const images = computed(() => {
   return (site.value?.media || []).filter((m) => m.type === 'image')
 })
 
-function loadSite() {
+const isPlayingThisSite = computed(() => {
+  return audioStore.isPlaying && site.value?.audio_guides?.some(g => g.id === audioStore.currentGuide?.id)
+})
+
+function playFirstGuide() {
+  if (site.value?.audio_guides?.length) {
+    audioStore.toggle(site.value.audio_guides[0])
+  }
+}
+
+async function loadSite() {
   const id = Number(route.params.id)
-  if (id) siteStore.fetchSite(id)
+  if (id) {
+    await siteStore.fetchSite(id)
+    // 数据加载完成后，如果存在语音导览，则自动播放第一条
+    if (site.value?.audio_guides?.length) {
+      audioStore.play(site.value.audio_guides[0])
+    }
+  }
 }
 
 onMounted(loadSite)

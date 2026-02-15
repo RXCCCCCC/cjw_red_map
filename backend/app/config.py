@@ -43,3 +43,6 @@ class Config:
 
     # 上传文件目录
     UPLOAD_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'uploads')
+
+    # 语音录音文件目录
+    RECORDER_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'static', 'recorder')
