@@ -63,9 +63,9 @@ Thumbs.db
 *.sqlite
 
 # 数据库备份文件（可能包含敏感数据）
-*.sql
-database_backup*.sql
-!backend/schema.sql
+# *.sql
+# database_backup*.sql
+# !backend/schema.sql
 
 # 本地配置文件
 backend/app/config_local.py
