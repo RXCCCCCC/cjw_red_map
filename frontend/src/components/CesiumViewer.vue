@@ -1036,7 +1036,7 @@ function startNavigation(route) {
             width: 8,
             material: new Cesium.PolylineGlowMaterialProperty({
                 glowPower: 0.25,
-                color: Cesium.Color.CYAN
+                color: Cesium.Color.fromCssColorString('#C41E24')
             }),
             clampToGround: true
         }
@@ -1100,7 +1100,7 @@ function toggleDrawingMode() {
             return currentPathPoints.value
         }, false),
         width: 5,
-        material: Cesium.Color.YELLOW.withAlpha(0.8),
+        material: Cesium.Color.fromCssColorString('#C41E24').withAlpha(0.8),
         clampToGround: true
       }
     })
@@ -1188,7 +1188,7 @@ async function savePath() {
            name: pathForm.value.name,
            description: pathForm.value.description,
            points: pointsData,
-           line_color: '#FFFF00',
+           line_color: '#C41E24',
            width: 5
        })
        if (res.data.code === 0) {
@@ -1224,7 +1224,7 @@ function renderRoute(route) {
         polyline: {
             positions: positions,
             width: route.width || 5,
-            material: Cesium.Color.fromCssColorString(route.line_color || '#FFFF00').withAlpha(0.8),
+            material: Cesium.Color.fromCssColorString(route.line_color || '#C41E24').withAlpha(0.8),
             clampToGround: true
         }
     })
@@ -1266,7 +1266,7 @@ function copyRoute(route) {
             return currentPathPoints.value
         }, false),
         width: 5,
-        material: Cesium.Color.YELLOW.withAlpha(0.8),
+        material: Cesium.Color.fromCssColorString('#C41E24').withAlpha(0.8),
         clampToGround: true
       }
     })
