@@ -110,7 +110,7 @@ def seed_data():
     # ── 媒体资源（从数据库导出） ──
     media_data = [
         {
-            'site_id': 1,
+            'site_id': 7,
             'type': 'image',
             'url': '/uploads/20260213155616_75ff592c.png',
             'title': '大厅.png',
@@ -118,7 +118,7 @@ def seed_data():
             'sort_order': 0,
         },
         {
-            'site_id': 1,
+            'site_id': 7,
             'type': 'image',
             'url': '/uploads/20260213155622_ca773d63.png',
             'title': '字牌.png',
@@ -126,7 +126,7 @@ def seed_data():
             'sort_order': 1,
         },
         {
-            'site_id': 1,
+            'site_id': 7,
             'type': 'image',
             'url': '/uploads/20260213155627_3f397bbc.png',
             'title': '中间.png',
@@ -134,7 +134,7 @@ def seed_data():
             'sort_order': 2,
         },
         {
-            'site_id': 1,
+            'site_id': 7,
             'type': 'image',
             'url': '/uploads/20260213155632_8b452af6.jpg',
             'title': '结束.jpg',
@@ -142,7 +142,7 @@ def seed_data():
             'sort_order': 3,
         },
         {
-            'site_id': 2,
+            'site_id': 1,
             'type': 'image',
             'url': '/uploads/20260213161828_b6f13dea.png',
             'title': '门牌.png',
@@ -150,7 +150,7 @@ def seed_data():
             'sort_order': 0,
         },
         {
-            'site_id': 2,
+            'site_id': 1,
             'type': 'image',
             'url': '/uploads/20260213161833_c651a8eb.jpg',
             'title': '老人.jpg',
@@ -158,7 +158,7 @@ def seed_data():
             'sort_order': 1,
         },
         {
-            'site_id': 5,
+            'site_id': 4,
             'type': 'image',
             'url': '/uploads/20260213161249_722aecff.png',
             'title': '旗子.png',
@@ -166,7 +166,7 @@ def seed_data():
             'sort_order': 0,
         },
         {
-            'site_id': 5,
+            'site_id': 4,
             'type': 'image',
             'url': '/uploads/20260213161255_99b06208.png',
             'title': '大厅.png',
@@ -174,7 +174,7 @@ def seed_data():
             'sort_order': 1,
         },
         {
-            'site_id': 5,
+            'site_id': 4,
             'type': 'image',
             'url': '/uploads/20260213161300_14fa8c6f.png',
             'title': '名字.png',
@@ -182,7 +182,7 @@ def seed_data():
             'sort_order': 2,
         },
         {
-            'site_id': 5,
+            'site_id': 4,
             'type': 'image',
             'url': '/uploads/20260213161305_8841f9d8.png',
             'title': '卧室.png',
