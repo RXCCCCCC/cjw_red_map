@@ -87,18 +87,6 @@ def seed_data():
             'sort_order': 0,
         },
         {
-            'name': '程家湾广场',
-            'description': (
-                '程家湾广场是村中的中心集会区，也是红色教育活动的主要场所。广场周围布局有红色文化展示标识。'
-            ),
-            'longitude': 117.88225000,
-            'latitude': 28.92964000,
-            'height': 171.0000,
-            'category': '公共设施',
-            'cover_image': '/uploads/20260213162055_28d96087.jpg',
-            'sort_order': 0,
-        },
-        {
             'name': '程家湾红色纪念馆',
             'description': (
                 '程家湾红色纪念馆，集中展示了程家湾地区的革命历史与红色文化遗产。'

@@ -8,12 +8,6 @@ const routes = [
     meta: { title: '程家湾红色资源数字地图' },
   },
   {
-    path: '/map',
-    name: 'Map',
-    component: () => import('@/views/MapView.vue'),
-    meta: { title: '红色地图' },
-  },
-  {
     path: '/model3d',
     name: 'Model3D',
     component: () => import('@/views/Model3DView.vue'),
