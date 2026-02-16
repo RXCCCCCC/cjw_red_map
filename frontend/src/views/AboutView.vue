@@ -23,7 +23,6 @@
         <ul class="text-gray-600 text-sm space-y-1.5">
           <li>• 前端：Vue 3 + Vite + Pinia + Tailwind CSS + Vant</li>
           <li>• 3D 渲染：CesiumJS（加载 3D Tiles 1.1 倾斜摄影模型）</li>
-          <li>• 2D 地图：Leaflet + 天地图底图</li>
           <li>• 后端：Python Flask + SQLAlchemy + PyMySQL</li>
           <li>• 数据库：MySQL</li>
           <li>• 三维建模：GISBox 倾斜摄影处理</li>

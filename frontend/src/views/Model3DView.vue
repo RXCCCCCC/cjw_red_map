@@ -19,13 +19,6 @@
         >
           🔄
         </button>
-        <router-link
-          to="/map"
-          class="w-10 h-10 rounded-full bg-white shadow-lg flex items-center justify-center text-red-primary no-underline"
-          title="返回地图"
-        >
-          🗺️
-        </router-link>
       </div>
     </div>
   </div>

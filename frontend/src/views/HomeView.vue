@@ -26,16 +26,7 @@
 
     <!-- 功能入口 -->
     <nav class="relative z-10 px-6 pb-10">
-      <div class="grid grid-cols-2 gap-4">
-        <router-link
-          to="/map"
-          class="entry-card bg-white/15 backdrop-blur-md rounded-2xl p-5 text-center text-white hover:bg-white/25 transition"
-        >
-          <div class="text-3xl mb-2">🗺️</div>
-          <div class="font-semibold">红色地图</div>
-          <div class="text-xs text-white/60 mt-1">地标标注 · 导览</div>
-        </router-link>
-
+      <div class="grid grid-cols-1 gap-4 max-w-xs mx-auto">
         <router-link
           to="/model3d"
           class="entry-card bg-white/15 backdrop-blur-md rounded-2xl p-5 text-center text-white hover:bg-white/25 transition"

@@ -95,14 +95,6 @@
           type="primary"
           color="#C41E24"
           class="flex-1"
-          @click="$router.push('/map')"
-        >
-          🗺️ 查看地图
-        </van-button>
-        <van-button
-          round
-          type="default"
-          class="flex-1"
           @click="$router.push('/model3d')"
         >
           🏔️ 三维模型
