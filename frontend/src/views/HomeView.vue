@@ -37,7 +37,7 @@
         </router-link>
 
         <router-link
-          to="/site/1"
+          to="/sites"
           class="entry-card bg-white/15 backdrop-blur-md rounded-2xl p-5 text-center text-white hover:bg-white/25 transition"
         >
           <div class="text-3xl mb-2">🏥</div>

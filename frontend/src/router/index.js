@@ -14,6 +14,12 @@ const routes = [
     meta: { title: '三维模型' },
   },
   {
+    path: '/sites',
+    name: 'SiteList',
+    component: () => import('@/views/SiteListView.vue'),
+    meta: { title: '红色地标' },
+  },
+  {
     path: '/site/:id',
     name: 'SiteDetail',
     component: () => import('@/views/SiteDetail.vue'),
