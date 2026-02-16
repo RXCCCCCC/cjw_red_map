@@ -19,7 +19,7 @@
       <h1 class="text-3xl font-bold text-white mb-2 tracking-wider">程家湾</h1>
       <h2 class="text-xl text-gold font-semibold mb-4">红色资源数字地图</h2>
       <p class="text-white/70 text-sm max-w-xs leading-relaxed">
-        走访红军医院、炮台、红军路<br/>
+        走访红军旧址、炮台、红军路<br/>
         数字化呈现闽浙赣革命根据地红色记忆
       </p>
     </header>
